@@ -1,0 +1,103 @@
+ATMstate.java
+public interface ATMState
+{
+    void insertCard();
+    void ejectCard();
+    void insertPin(int pinEntered);
+    void requestCash(int cashToWithdraw);
+}
+
+ATMMachine.java
+
+public class ATMMachine {
+    ATMState hasCard;
+    ATMState noCard;
+    ATMState hasCorrectPin;
+    ATMState atmOutOfMoney;
+ 
+    ATMState atmState;
+ 
+    int cashInMachine = 2000;
+    boolean correctPinEntered = false;
+ 
+    public ATMMachine()
+    {
+        hasCard = new HasCard(this);
+        noCard = new NoCard(this);
+        hasCorrectPin = new HasPin(this);
+        atmOutOfMoney = new NoCash(this);
+ 
+        atmState = noCard;
+ 
+        if(cashInMachine < 0){           atmState = atmOutOfMoney;       }   }       void setATMState(ATMState newATMState)  {           atmState = newATMState;     }       public void setCashInMachine(int newCashInMachine)  {       cashInMachine = newCashInMachine;   }       public void insertCard()    {       atmState.insertCard();  }   public void ejectCard()     {       atmState.ejectCard();   }   public void requestCash(int cashToWithdraw)     {       atmState.requestCash(cashToWithdraw);   }   public void insertPin(int pinEntered)   {       atmState.insertPin(pinEntered);     }       public ATMState getYesCardState() { return hasCard; }   public ATMState getNoCardState() { return noCard; }     public ATMState getHasPin() { return hasCorrectPin; }   public ATMState getNoCashState() { return atmOutOfMoney; } }
+
+
+HasCard.java
+
+public class HasCard implements ATMState {     ATMMachine atmMachine;      public HasCard(ATMMachine newATMMachine)    {           atmMachine = newATMMachine;     }   public void insertCard()    {           System.out.println("Anda hanya bisa memasukkan kartu satu saja");       }   public void ejectCard()     {       System.out.println("Kartu dikeluarkan");        atmMachine.setATMState(atmMachine.getNoCardState());        }   public void requestCash(int cashToWithdraw)     {           System.out.println("Anda belum memasukkan PIN!");       }   public void insertPin(int pinEntered)   {           if(pinEntered == 1111)      {               System.out.println("PIN yang dimasukkan benar");            atmMachine.correctPinEntered = true;            atmMachine.setATMState(atmMachine.getHasPin());         }       else        {           System.out.println("PIN yang dimasukkan salah");            atmMachine.correctPinEntered = false;           System.out.println("Kartu dikeluarkan");            atmMachine.setATMState(atmMachine.getNoCardState());            }       }    }
+
+
+NoCard.java
+
+public class NoCard implements ATMState  {     ATMMachine atmMachine;      public NoCard(ATMMachine newATMMachine)     {           atmMachine = newATMMachine;     }   public void insertCard()    {           System.out.println("Masukkan PIN anda");        atmMachine.setATMState(atmMachine.getYesCardState());       }   public void ejectCard()     {           System.out.println("Anda tidak memasukkan kartu");      }   public void requestCash(int cashToWithdraw)     {           System.out.println("Anda belum memasukkan kartu, tidak dapat menarik uang");        }   public void insertPin(int pinEntered)   {           System.out.println("Anda belum memasukkan kartu, tidak dapat menginput PIN");       } }
+
+HasPin.java
+public class HasPin implements ATMState  {     ATMMachine atmMachine;      public HasPin(ATMMachine newATMMachine)     {           atmMachine = newATMMachine;     }   public void insertCard()    {           System.out.println("Anda sudah memasukkan kartu");      }   public void ejectCard()     {           System.out.println("Kartu dikeluarkan");        atmMachine.setATMState(atmMachine.getNoCardState());        }   public void requestCash(int cashToWithdraw)     {           if(cashToWithdraw > atmMachine.cashInMachine)
+        {
+            System.out.println("Saldo ATM tidak cukup untuk melakukan penarikan anda");
+            System.out.println("Kartu dikeluarkan");
+            atmMachine.setATMState(atmMachine.getNoCardState());
+        }
+        else
+        {
+            System.out.println(cashToWithdraw + " dapat dilakukan penarikan oleh mesin");
+            atmMachine.setCashInMachine(atmMachine.cashInMachine - cashToWithdraw);
+ 
+            System.out.println("Kartu dikeluarkan");
+            atmMachine.setATMState(atmMachine.getNoCardState());
+ 
+            if(atmMachine.cashInMachine <= 0)
+            {
+                atmMachine.setATMState(atmMachine.getNoCashState());
+            }
+        }
+    }
+ 
+    public void insertPin(int pinEntered)
+    {
+        System.out.println("Anda sudah memasukkan PIN");
+    }
+}
+
+NoCash.java
+public class NoCash implements ATMState
+{
+    ATMMachine atmMachine;
+ 
+    public NoCash(ATMMachine newATMMachine)
+    {
+        atmMachine = newATMMachine;
+    }
+ 
+    public void insertCard()
+    {
+        System.out.println("ATM tidak memiliki uang didalamnya");
+        System.out.println("Kartu dikeluarkan");
+    }
+ 
+    public void ejectCard()
+    {
+        System.out.println("ATM tidak memiliki uang didalamnya");
+        System.out.println("Tidak ada kartu untuk dikeluarkan");
+    }
+ 
+    public void requestCash(int cashToWithdraw)
+    {
+        System.out.println("ATM tidak memiliki uang didalamnya");
+    }
+ 
+    public void insertPin(int pinEntered)
+    {
+        System.out.println("ATM tidak memiliki uang didalamnya");
+    }
+}
